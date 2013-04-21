@@ -29,7 +29,7 @@ public class Xtreemfsclient {
         
         Logging.start(Logging.LEVEL_WARN, Logging.Category.all);
         
-        String dirAddress = "192.168.1.7" + ":" + "32638";
+        String dirAddress = "192.168.1.7" + ":" + "30638";
         Client client = ClientFactory.createClient(dirAddress, userCredentials, null, options);
         client.start();
         
