@@ -29,6 +29,8 @@ public class Xtreemfsclient {
         
         Logging.start(Logging.LEVEL_WARN, Logging.Category.all);
         
+        userCredentials = UserCredentials.newBuilder().setUsername("enrico").addGroups("adm").build();
+        
         String dirAddress = "192.168.1.7" + ":" + "32638";
         Client client = ClientFactory.createClient(dirAddress, userCredentials, null, options);
         client.start();
@@ -38,19 +40,21 @@ public class Xtreemfsclient {
         // Open a file.
         FileHandle fileHandle = volume.openFile(
                 userCredentials,
-                "/bla.tzt",
+                "/bla.txt",
                 SYSTEM_V_FCNTL.SYSTEM_V_FCNTL_H_O_CREAT.getNumber()
                         | SYSTEM_V_FCNTL.SYSTEM_V_FCNTL_H_O_TRUNC.getNumber()
-                        | SYSTEM_V_FCNTL.SYSTEM_V_FCNTL_H_O_RDWR.getNumber());
-
+                        | SYSTEM_V_FCNTL.SYSTEM_V_FCNTL_H_O_RDWR.getNumber(), 0777);
+        
         // Get file attributes
-        Stat stat = volume.getAttr(userCredentials, "/bla.tzt");
+        Stat stat = volume.getAttr(userCredentials, "/bla.txt");
         //assertEquals(0, stat.getSize());
 
         // Write to file.
         String data = "Need a testfile? Why not (\\|)(+,,,+)(|/)?";
         fileHandle.write(userCredentials, data.getBytes(), data.length(), 0);
+        fileHandle.flush();         
         
+        //fileHandle.close();      
         client.shutdown();
     }
 
