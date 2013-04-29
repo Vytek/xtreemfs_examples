@@ -4,6 +4,10 @@
  */
 package xtreemfsclient;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import org.xtreemfs.common.libxtreemfs.Client;
 import org.xtreemfs.common.libxtreemfs.ClientFactory;
 import org.xtreemfs.common.libxtreemfs.FileHandle;
@@ -23,9 +27,10 @@ public class Xtreemfsclient {
     private static UserCredentials userCredentials;
     private static Client client;
     private static Volume volume;
-    final String VOLUME_NAME_1 = "myVolume";
+    final String VOLUME_NAME_1 = "demo";
+    static final long MAX_FILE_SIZE = 10 * 1000 * 1024; //10MB limit - hopefully this 
     
-    public void Setup() throws Exception {
+    public void SetupClient() throws Exception {
         Options options = new Options();
         options.setPeriodicFileSizeUpdatesIntervalS(10);
         
@@ -33,7 +38,7 @@ public class Xtreemfsclient {
         
         userCredentials = UserCredentials.newBuilder().setUsername("enrico").addGroups("adm").build();
         
-        String dirAddress = "192.168.1.7" + ":" + "32638";
+        String dirAddress = "demo.xtreemfs.org" + ":" + "32638";
         client = ClientFactory.createClient(dirAddress, userCredentials, null, options);
         client.start();
         
@@ -53,10 +58,17 @@ public class Xtreemfsclient {
                         | SYSTEM_V_FCNTL.SYSTEM_V_FCNTL_H_O_TRUNC.getNumber()
                         | SYSTEM_V_FCNTL.SYSTEM_V_FCNTL_H_O_RDWR.getNumber(), 0777);
       
-        // Write to file.
-        String data = "Need a testfile? Why not (\\|)(+,,,+)(|/)?";
-        fileHandle.write(userCredentials, data.getBytes(), data.length(), 0);
-        fileHandle.flush();         
+        //Load file
+        File f = new File(GetExecutionPath()+File.separator+   FileNamePath);
+        
+        // Write to file from string in memory
+        //String data = "Need a testfile? Why not (\\|)(+,,,+)(|/)?";
+        //fileHandle.write(userCredentials, data.getBytes(), data.length(), 0);
+        //fileHandle.flush();
+        
+        // Write a file from file on real file system
+        fileHandle.write(userCredentials, read(f), read(f).length, 0);
+        fileHandle.flush();
         
         fileHandle.close();    
     }
@@ -95,19 +107,54 @@ public class Xtreemfsclient {
     }
     
     /*
-     * 
+     * Shutdown Xtreemfs client 
      */
     public void ShutdownClient() throws Exception {
        client.shutdown(); 
     }
     
     /*
-     * 
+     * Very simple log
      */
     private static void log(Object aMsg){
         System.out.println(String.valueOf(aMsg));
     }
     
+    /*
+     * @return String path on jar file executor 
+     */
+    private String GetExecutionPath(){
+        String absolutePath = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+        absolutePath = absolutePath.substring(0, absolutePath.lastIndexOf("/"));
+        return absolutePath;
+    }
+    
+    /*
+     * Read file and return byte[]
+     */
+    private byte[] read(File file) throws IOException, FileTooBigException {
+
+    if ( file.length() > MAX_FILE_SIZE ) {
+        throw new FileTooBigException(file);
+    }
+
+    byte []buffer = new byte[(int) file.length()];
+    InputStream ios = null;
+    try {
+        ios = new FileInputStream(file);
+        if ( ios.read(buffer) == -1 ) {
+            throw new IOException("EOF reached while trying to read the whole file");
+        }        
+    } finally { 
+        try {
+             if ( ios != null ) 
+                  ios.close();
+        } catch ( IOException e) {
+        }
+    }
+
+    return buffer;
+}
     
     /**
      * @param args the command line arguments
@@ -116,13 +163,13 @@ public class Xtreemfsclient {
          Xtreemfsclient xt=new Xtreemfsclient();
          log("Initial Setup");
          //Initial Setup
-         xt.Setup();
-         log("Add file final_test.txt");
+         xt.SetupClient();
+         log("Add file www_xtreemfs_org.pdf");
          //Add file
-         xt.AddFile("final_test.txt");
-         log("Read file final_test.txt");
+         xt.AddFile("www_xtreemfs_org.pdf");
+         //log("Read file www_xtreemfs_org.pdf");
          //Read file
-         xt.ReadFile("final_test.txt");
+         //xt.ReadFile("www_xtreemfs_org.pdf");
          log("Exit.");
          //Exit
          xt.ShutdownClient();
