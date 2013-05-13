@@ -169,9 +169,12 @@ public class Xtreemfsclient {
          Log.info("Add file www_xtreemfs_org.pdf");
          //Add file
          xt.AddFile("www_xtreemfs_org.pdf");
-         //log("Read file www_xtreemfs_org.pdf");
+         //log.info("Read file www_xtreemfs_org.pdf");
          //Read file
          //xt.ReadFile("www_xtreemfs_org.pdf");
+         //Delete file
+         //log.info("Delete file: ");
+         //xt.DeleteFile("www_xtreemfs_org.pdf");
          Log.info("Exit.");
          //Exit
          xt.ShutdownClient();
