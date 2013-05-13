@@ -4,6 +4,7 @@
  */
 package xtreemfsclient;
 
+import com.esotericsoftware.minlog.Log;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -160,17 +161,18 @@ public class Xtreemfsclient {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
+        
+         Log.info("Setup xtreemfs client.");
          Xtreemfsclient xt=new Xtreemfsclient();
-         log("Initial Setup");
          //Initial Setup
          xt.SetupClient();
-         log("Add file www_xtreemfs_org.pdf");
+         Log.info("Add file www_xtreemfs_org.pdf");
          //Add file
          xt.AddFile("www_xtreemfs_org.pdf");
          //log("Read file www_xtreemfs_org.pdf");
          //Read file
          //xt.ReadFile("www_xtreemfs_org.pdf");
-         log("Exit.");
+         Log.info("Exit.");
          //Exit
          xt.ShutdownClient();
     }
